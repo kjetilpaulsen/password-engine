@@ -1,0 +1,7 @@
+[project]
+name = "password-engine"
+version = "0.1.0"
+description = "Headless engine for a password app."
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = []
