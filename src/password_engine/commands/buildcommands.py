@@ -46,6 +46,7 @@ def build_commands(cmd_inputs: tuple[FrontendCommandInput, ...]) -> tuple[Comman
             lowercase=bool(opts.get("lowercase", False)),
             numbers=bool(opts.get("numbers", False)),
             specials=bool(opts.get("specials", False)),
+            password_length=int(opts.get("password_length", 12))
         ),
         "listpasswords": lambda opts: CmdListPasswords(
         ),

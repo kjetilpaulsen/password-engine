@@ -15,6 +15,7 @@ class CmdGeneratePassword(Command):
     uppercase: bool = False
     numbers: bool = False
     specials: bool = False
+    password_length: int = 12
 
 @dataclass(frozen=True)
 class CmdListPasswords(Command): ...

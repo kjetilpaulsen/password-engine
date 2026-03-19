@@ -81,6 +81,7 @@ def cli_parser(argv: list[str] | None = None) -> tuple[tuple[FrontendCommandInpu
     generate_password_parser.add_argument("--lowercase", action="store_true", default=False, help="Must contain at least one lowercase character")
     generate_password_parser.add_argument("--numbers", action="store_true", default=False, help="Must contain at least one number")
     generate_password_parser.add_argument("--specials", action="store_true", default=False, help="Must contain at least one special character")
+    generate_password_parser.add_argument("--password-length", type=int, default=12, help="Must contain at least one special character")
 
     # List passwords
     list_passwords_parser = subparses.add_parser("listpasswords", help="List passwords stored for a user")
@@ -126,6 +127,7 @@ def cli_parser(argv: list[str] | None = None) -> tuple[tuple[FrontendCommandInpu
                     "lowercase": args.uppercase,
                     "numbers": args.numbers,
                     "specials": args.specials,
+                    "password_length": args.password_length,
                 },
             )
         )

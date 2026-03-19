@@ -8,6 +8,7 @@ from password_engine.commands.commands import CmdDisplayVersion, CmdGeneratePass
 from password_engine.db.repo import PasswordRepo
 from password_engine.encryption.crypto import encrypt_secret
 from password_engine.events.events import Event, EvtLog, EvtResult
+from password_engine.generator.passwordgenerator import PasswordGenerator
 from password_engine.handlers.commandhandler import CommandHandler
 from password_engine.runtime.runtime import MetaInfo
 
@@ -71,16 +72,25 @@ class GeneratePasswordHandler(CommandHandler):
             username=self._input_username(),
             master_password=self._input_password(),
         )
-        generatedpassword = "mygeneratedpassword"
-        print(f"Is the password accepted: {generatedpassword}")
+        pwdgntr = PasswordGenerator(
+            self.cmd.uppercase,
+            self.cmd.lowercase,
+            self.cmd.numbers,
+            self.cmd.specials,
+            self.cmd.password_length,
+            )
+        pwd = pwdgntr.generate()
+        print(f"Is the password accepted: {pwd}")
         ans = input("y/n: ")
+        if ans == "n":
+            raise ValueError("Bailing for now")
         tag = input("Tag: ")
         site_username = input("Site_username: ")
         site_email = input("Site email: ")
         site_url = input("Site url: ")
         if ans == "y":
             encrypted = encrypt_secret(
-                plaintext=generatedpassword,
+                plaintext=pwd,
                 key=session.vault_key,
             )
             self.password_repo.insert_vault_entry(
