@@ -1,0 +1,50 @@
+# VCS
+.git
+.gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+
+# Local tooling / editor
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Project-local runtime/config junk
+.env
+_runtime/
+tmp/
+logs/
+cache/
+data/
+state/
+config/
+
+# Tests are not needed in the runtime image
+tests/
+
+# OS junk
+.DS_Store
+
+# Local env / secrets
+.env
+.env.*
+!.env.example

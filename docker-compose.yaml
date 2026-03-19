@@ -1,0 +1,65 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    image: ${DOCKER_USER}/${DOCKER_REPO}:${DOCKER_TAG}
+    container_name: ${APP_NAME}
+    user: "${HOST_UID}:${HOST_GID}"
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8012:8012"
+    environment:
+      XDG_DATA_HOME: /xdg/data
+      XDG_STATE_HOME: /xdg/state
+      XDG_CACHE_HOME: /xdg/cache
+      XDG_CONFIG_HOME: /xdg/config
+
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+
+      FILE_LOG: ${FILE_LOG}
+      CONSOLE_LOG: ${CONSOLE_LOG}
+      STDERR_LOG: ${STDERR_LOG}
+      LOG_LEVEL: ${LOG_LEVEL}
+      CONSOLE_LEVEL: ${CONSOLE_LEVEL}
+      STDERR_LEVEL: ${STDERR_LEVEL}
+    volumes:
+      - ${HOME}/.local/share/docker:/xdg/data
+      - ${HOME}/.local/state/docker:/xdg/state
+      - ${HOME}/.cache/docker:/xdg/cache
+      - ${HOME}/.config/docker:/xdg/config
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8012/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  postgres:
+    image: postgres:17
+    container_name: ${APP_NAME}-postgres
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    # ports:
+    #   - "5432:5432"
+    volumes:
+      - ${HOME}/.local/state/docker/postgresql/${APP_NAME}:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
