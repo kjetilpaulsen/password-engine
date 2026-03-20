@@ -93,7 +93,7 @@ source .venv/bin/activate
 
 ## Usage
 
-> ⚠️ Current state: command system is not fully wired
+> Current state: command system is not fully wired
 
 The intended functionality:
 
