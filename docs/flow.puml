@@ -1,0 +1,53 @@
+@startuml
+title Password Engine - Intended Execution Flow
+
+actor User
+participant CLI
+participant FrontendCommandInput
+participant CommandBuilder as "build_commands()"
+participant App
+participant Handler
+participant Auth as "Authentication Service"
+participant KDF as "Key Derivation"
+participant Crypto as "Encryption Service"
+participant Generator as "Password Generator"
+database DB
+participant Event
+
+User -> CLI : run command\n(createuser / --list-passwords / --generate-password)
+CLI -> FrontendCommandInput : parse args / prompt if needed
+FrontendCommandInput -> CommandBuilder : structured input
+CommandBuilder -> App : build command(s)
+App -> Handler : resolve and dispatch command
+
+alt createuser
+  Handler -> Auth : hash/store credentials
+  Handler -> DB : create user
+  Handler -> Event : emit success result
+else list passwords
+  Handler -> Auth : verify credentials
+  Auth --> Handler : authenticated
+  Handler -> KDF : derive key
+  KDF --> Handler : encryption key
+  Handler -> DB : fetch encrypted passwords
+  DB --> Handler : encrypted entries
+  Handler -> Crypto : decrypt entries
+  Crypto --> Handler : plaintext results
+  Handler -> Event : emit password list
+else generate password
+  Handler -> Auth : verify credentials
+  Auth --> Handler : authenticated
+  Handler -> KDF : derive key
+  KDF --> Handler : encryption key
+  Handler -> Generator : generate secure password
+  Generator --> Handler : generated password
+  Handler -> Crypto : encrypt password
+  Crypto --> Handler : encrypted password
+  Handler -> DB : store encrypted password
+  Handler -> Event : emit generated password / success
+end
+
+App -> CLI : stream events
+CLI -> User : display output
+
+@enduml

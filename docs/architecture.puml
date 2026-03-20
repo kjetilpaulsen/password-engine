@@ -1,0 +1,79 @@
+@startuml
+left to right direction
+title Password Engine - Intended High-Level Architecture
+
+package "Entrypoints" {
+  [CLI]
+  [FastAPI]
+}
+
+package "Command Layer" {
+  [FrontendCommandInput]
+  [build_commands()]
+  [Command]
+  [CreateUserCommand]
+  [ListPasswordsCommand]
+  [GeneratePasswordCommand]
+}
+
+package "Core" {
+  [App]
+}
+
+package "Execution" {
+  [CreateUserHandler]
+  [ListPasswordsHandler]
+  [GeneratePasswordHandler]
+  [Event]
+}
+
+package "Security / Services" {
+  [Authentication Service]
+  [Key Derivation]
+  [Encryption Service]
+  [Password Generator]
+}
+
+package "Storage" {
+  database "Password DB" as DB
+}
+
+CLI --> [FrontendCommandInput]
+FastAPI --> [FrontendCommandInput]
+
+[FrontendCommandInput] --> [build_commands()]
+[build_commands()] --> [Command]
+
+[Command] --> [CreateUserCommand]
+[Command] --> [ListPasswordsCommand]
+[Command] --> [GeneratePasswordCommand]
+
+[CreateUserCommand] --> [App]
+[ListPasswordsCommand] --> [App]
+[GeneratePasswordCommand] --> [App]
+
+[App] --> [CreateUserHandler]
+[App] --> [ListPasswordsHandler]
+[App] --> [GeneratePasswordHandler]
+
+[CreateUserHandler] --> [Authentication Service]
+[CreateUserHandler] --> DB
+[CreateUserHandler] --> [Event]
+
+[ListPasswordsHandler] --> [Authentication Service]
+[ListPasswordsHandler] --> [Key Derivation]
+[ListPasswordsHandler] --> [Encryption Service]
+[ListPasswordsHandler] --> DB
+[ListPasswordsHandler] --> [Event]
+
+[GeneratePasswordHandler] --> [Authentication Service]
+[GeneratePasswordHandler] --> [Key Derivation]
+[GeneratePasswordHandler] --> [Encryption Service]
+[GeneratePasswordHandler] --> [Password Generator]
+[GeneratePasswordHandler] --> DB
+[GeneratePasswordHandler] --> [Event]
+
+[Event] --> CLI
+[Event] --> FastAPI
+
+@enduml
