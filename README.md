@@ -9,7 +9,7 @@ A Python application for secure password generation, storage, and retrieval, wit
 > This project is currently in migration from the python-project-blueprint template.  
 > The command structure is temporarily not fully implemented.  
 > User input is currently handled directly in handlers instead of through the command system.  
-> This will be refactored shortly to restore proper command → handler → event flow.
+> This will be refactored to restore proper command → handler → event flow.
 
 ### What this is
 
