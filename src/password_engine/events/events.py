@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
+from password_engine.auth.auth import AuthenticatedSession
 from password_engine.commands.commands import Command
 
 @dataclass(slots=True, frozen=True)
@@ -55,4 +56,5 @@ class EvtRequestInput(Event):
 
 @dataclass(slots=True, frozen=True)
 class EvtConfirmPassword(EvtRequestInput):
-    password: str
+    password: str | None = None
+    session: AuthenticatedSession | None = None

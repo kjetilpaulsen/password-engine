@@ -5,7 +5,7 @@ from typing import Iterator
 
 from password_engine.auth.auth import AuthService
 from password_engine.commands.commands import CmdCreateUser
-from password_engine.events.events import Event, EvtLog
+from password_engine.events.events import Event, EvtLogMessage
 from password_engine.handlers.commandhandler import CommandHandler
 
 logger = logging.getLogger(__name__)
@@ -58,26 +58,27 @@ class CreateUserHandler(CommandHandler):
         logger.info("Handling CmdCreateUser ..")
         yield from self._create_user()
 
-    def _input_username(self) -> str:
-        return input("Username: ")
+    # def _input_username(self) -> str:
+    #     return input("Username: ")
+    #
+    # def _input_password(self) -> str:
+    #     return input("Password: ")
 
-    def _input_password(self) -> str:
-        return input("Password: ")
-
-    def _input_confirm_password(self) -> str:
-        return input("Confirm password: ")
+    # def _input_confirm_password(self) -> str:
+    #     return input("Confirm password: ")
 
     def _create_user(self) -> Iterator[Event]:
-        username = self._input_username()
-        password = self._input_password()
-        confirm_password = self._input_confirm_password()
+        username = self.cmd.username
+        password = self.cmd.password
+        # confirm_password = self._input_confirm_password()
 
-        if password != confirm_password:
-            raise ValueError("Passwords do not match")
+        # if password != confirm_password:
+        #     raise ValueError("Passwords do not match")
 
         self.auth_service.register_user(
             username=username,
             master_password=password,
         )
 
-        yield EvtLog(message="User created")
+        logger.info("Yielding")
+        yield EvtLogMessage(cmd_id= self.cmd.cmd_id, level="info", message="User created")

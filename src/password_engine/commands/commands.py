@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 
+from password_engine.auth.auth import AuthenticatedSession
+@dataclass(frozen=True)
 class Command:
     """
     Base class for one-shot app commands.
@@ -12,6 +14,8 @@ class CmdDisplayVersion(Command):
 
 @dataclass(frozen=True)
 class CmdGeneratePassword(Command):
+    username: str
+    password: str
     lowercase: bool = False
     uppercase: bool = False
     numbers: bool = False
@@ -19,11 +23,20 @@ class CmdGeneratePassword(Command):
     password_length: int = 12
 
 @dataclass(frozen=True)
-class CmdListPasswords(Command): ...
+class CmdListPasswords(Command):
+    username: str
+    password: str
 
 @dataclass(frozen=True)
-class CmdCreateUser(Command): ...
+class CmdCreateUser(Command):
+    username: str
+    password: str
 
 @dataclass(frozen=True)
 class CmdConfirmPassword(Command):
     password: str
+    session: AuthenticatedSession | None = None
+    tag: str | None = None
+    site_username: str | None = None
+    site_email: str | None = None
+    site_url: str | None = None

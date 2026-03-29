@@ -77,6 +77,8 @@ def cli_parser(argv: list[str] | None = None) -> tuple[tuple[FrontendCommandInpu
 
     # Version
     generate_password_parser = subparses.add_parser("generate", help="Generate a new password for storage")
+    generate_password_parser.add_argument("--username", type=str, default=None, help="Username for the user")
+    generate_password_parser.add_argument("--password", type=str, default=None, help="Password for the user")
     generate_password_parser.add_argument("--uppercase", action="store_true", default=False, help="Must contain at least one uppercase character")
     generate_password_parser.add_argument("--lowercase", action="store_true", default=False, help="Must contain at least one lowercase character")
     generate_password_parser.add_argument("--numbers", action="store_true", default=False, help="Must contain at least one number")
@@ -85,8 +87,13 @@ def cli_parser(argv: list[str] | None = None) -> tuple[tuple[FrontendCommandInpu
 
     # List passwords
     list_passwords_parser = subparses.add_parser("listpasswords", help="List passwords stored for a user")
+    list_passwords_parser.add_argument("--username", type=str, default=None, help="Username for the user")
+    list_passwords_parser.add_argument("--password", type=str, default=None, help="Password for the user")
     # Create User
-    create_user_parser = subparses.add_parser("createuser", help="Create a new user for the app")
+    create_user_parser = subparses.add_parser("create-user", help="Create a new user for the app")
+    create_user_parser.add_argument("--username", type=str, default=None, help="The username for the new user")
+    create_user_parser.add_argument("--password", type=str, default=None, help="The password for the new user")
+    create_user_parser.add_argument("--confirm-password", type=str, default=None, help="Confirm the password for the new user")
     # Parse them
 
     args = parser.parse_args(argv)
@@ -119,10 +126,14 @@ def cli_parser(argv: list[str] | None = None) -> tuple[tuple[FrontendCommandInpu
             )
         )
     if args.command == "generate":
+        if (args.username or args.password) is None:
+            raise ValueError("Username and password needs to be supplied")
         commands.append(
             FrontendCommandInput(
                 name="generate",
                 options={
+                    "username": args.username,
+                    "password": args.password,
                     "uppercase": args.uppercase,
                     "lowercase": args.uppercase,
                     "numbers": args.numbers,
@@ -132,18 +143,28 @@ def cli_parser(argv: list[str] | None = None) -> tuple[tuple[FrontendCommandInpu
             )
         )
     if args.command == "listpasswords":
+        if (args.username or args.password) is None:
+            raise ValueError("Username and password needs to be supplied")
         commands.append(
             FrontendCommandInput(
                 name="listpasswords",
                 options={
+                    "username": args.username,
+                    "password": args.password,
                 },
             )
         )
-    if args.command == "createuser":
+    if args.command == "create-user":
+        if (args.username or args.password) is None:
+            raise ValueError("Username and password needs to be supplied")
+        if args.password != args.confirm_password:
+            raise ValueError("Password and confirmpassword must be the same")
         commands.append(
             FrontendCommandInput(
-                name="createuser",
+                name="create-user",
                 options={
+                    "username": args.username,
+                    "password": args.password,
                 },
             )
         )

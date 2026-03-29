@@ -1,20 +1,20 @@
-
 from __future__ import annotations
 import logging
 from typing import Iterator
 
 # FIX: change project name for imports
-from password_engine.auth.auth import AuthService
-from password_engine.commands.commands import CmdDisplayVersion, CmdGeneratePassword, CmdListPasswords
+from password_engine.auth.auth import AuthService, AuthenticatedSession
+from password_engine.commands.commands import Command, CmdConfirmPassword, CmdGeneratePassword
 from password_engine.db.repo import PasswordRepo
-from password_engine.encryption.crypto import decrypt_secret, encrypt_secret
-from password_engine.events.events import Event, EvtLogMessage, EvtResult
+from password_engine.encryption.crypto import encrypt_secret
+from password_engine.events.events import Event, EvtConfirmPassword, EvtLogMessage, EvtRequestInput, EvtResult
+from password_engine.generator.passwordgenerator import PasswordGenerator
 from password_engine.handlers.commandhandler import CommandHandler
 from password_engine.runtime.runtime import MetaInfo
 
 logger = logging.getLogger(__name__)
 
-class ListPasswordsHandler(CommandHandler):
+class StorePasswordHandler(CommandHandler):
     """
     Command handler responsible for executing the `CmdDisplayVersion` command.
 
@@ -25,9 +25,8 @@ class ListPasswordsHandler(CommandHandler):
 
     This handler resolves and returns the application's current version.
     """
-    def __init__(self, cmd: CmdListPasswords, auth_service: AuthService, password_repo: PasswordRepo):
+    def __init__(self, cmd: CmdConfirmPassword, password_repo: PasswordRepo):
         self.cmd = cmd
-        self.auth_service=auth_service
         self.password_repo=password_repo
 
     def handle(self) -> Iterator[Event]:
@@ -59,28 +58,22 @@ class ListPasswordsHandler(CommandHandler):
             command execution.
         """
         logger.info("Handling CmdDisplayVersion ..")
-        yield from self._list_passwords()
+        yield from self._store_password()
 
-    def _input_username(self) -> str:
-        return input("Username: ")
 
-    def _input_password(self) -> str:
-        return input("Password: ")
-
-    def _list_passwords(self) -> Iterator[Event]:
-        session = self.auth_service.authenticate_user(
-            username=self._input_username(),
-            master_password=self._input_password(),
+    def _store_password(self) -> Iterator[Event]:
+        encrypted = encrypt_secret(
+            plaintext=self.cmd.password,
+            key=self.cmd.session.vault_key,
         )
-
-        entries= self.password_repo.list_vault_entries_for_user(session.user_id)
-
-        for entry in entries:
-            password = decrypt_secret(
-                ciphertext=entry.encrypted_password,
-                nonce=entry.encryption_nonce,
-                key=session.vault_key,
-            )
-            print(entry.tag, entry.site_username, entry.site_email, entry.site_url, password)
-
-        yield EvtLogMessage(level="info", message="Password listed")
+        self.password_repo.insert_vault_entry(
+            owner_user_id=self.cmd.session.user_id,
+            tag=self.cmd.tag,
+            site_username=self.cmd.site_username,
+            site_email=self.cmd.site_email,
+            site_url=self.cmd.site_url,
+            encrypted_password=encrypted.ciphertext,
+            encryption_nonce=encrypted.nonce,
+            encryption_key_version=encrypted.key_version,
+        )
+        yield EvtLogMessage(cmd_id=self.cmd.cmd_id, level="info", message="Password generated and stored")

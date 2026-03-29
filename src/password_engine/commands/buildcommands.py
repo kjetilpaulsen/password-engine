@@ -1,9 +1,10 @@
 from __future__ import annotations
 import logging
+import uuid
 from typing import Callable
 
 # FIX: change project name for imports
-from password_engine.commands.commands import CmdCreateUser, CmdGeneratePassword, CmdListPasswords, Command, CmdDisplayVersion
+from password_engine.commands.commands import Command, CmdCreateUser, CmdGeneratePassword, CmdListPasswords, CmdDisplayVersion
 from password_engine.commands.frontendcommandinput import FrontendCommandInput
 
 logger = logging.getLogger(__name__)
@@ -39,9 +40,13 @@ def build_commands(cmd_input: FrontendCommandInput) -> Command:
 
     command_builders: dict[str, Callable[[dict[str, object]], Command]] = {
         "version": lambda opts: CmdDisplayVersion(
+            cmd_id = str(uuid.uuid4()),
             uppercase=bool(opts.get("uppercase", False))
         ),
         "generate": lambda opts: CmdGeneratePassword(
+            cmd_id = str(uuid.uuid4()),
+            username=str(opts.get("username", None)),
+            password=str(opts.get("password", None)),
             uppercase=bool(opts.get("uppercase", False)),
             lowercase=bool(opts.get("lowercase", False)),
             numbers=bool(opts.get("numbers", False)),
@@ -49,8 +54,14 @@ def build_commands(cmd_input: FrontendCommandInput) -> Command:
             password_length=int(opts.get("password_length", 12))
         ),
         "listpasswords": lambda opts: CmdListPasswords(
+            cmd_id = str(uuid.uuid4()),
+            username=str(opts.get("username", None)),
+            password=str(opts.get("password", None)),
         ),
-        "createuser": lambda opts: CmdCreateUser(
+        "create-user": lambda opts: CmdCreateUser(
+            cmd_id = str(uuid.uuid4()),
+            username=str(opts.get("username", None)),
+            password=str(opts.get("password", None)),
         ),
     }
     commands: list[Command] = []

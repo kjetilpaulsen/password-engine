@@ -4,12 +4,13 @@ import logging
 
 # FIX: change project name for imports
 from password_engine.auth.auth import AuthService
-from password_engine.commands.commands import CmdCreateUser, CmdGeneratePassword, CmdListPasswords, Command, CmdDisplayVersion
-from password_engine.events.events import Event
+from password_engine.commands.commands import CmdConfirmPassword, CmdCreateUser, CmdGeneratePassword, CmdListPasswords, Command, CmdDisplayVersion
+from password_engine.events.events import Event, EvtError
 from password_engine.handlers.createuserhandler import CreateUserHandler
 from password_engine.handlers.displayversionhandler import DisplayVersionHandler
 from password_engine.handlers.generatepasswordhandler import GeneratePasswordHandler
 from password_engine.handlers.listpasswordshandler import ListPasswordsHandler
+from password_engine.handlers.storepasswordhandler import StorePasswordHandler
 from password_engine.runtime.runtime import AppPaths, CFGDataBase, CFGDev, MetaInfo
 from password_engine.db.connect import connect
 from password_engine.db.schema import create_schema
@@ -76,6 +77,7 @@ class App:
             CmdGeneratePassword: lambda cmd: GeneratePasswordHandler(cmd, auth_service, password_repo).handle(),
             CmdListPasswords: lambda cmd: ListPasswordsHandler(cmd, auth_service, password_repo).handle(),
             CmdCreateUser: lambda cmd: CreateUserHandler(cmd, auth_service).handle(),
+            CmdConfirmPassword: lambda cmd: StorePasswordHandler(cmd, password_repo).handle(),
         }
 
 

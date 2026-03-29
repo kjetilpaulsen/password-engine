@@ -58,15 +58,19 @@ def cli(argv: list[str] | None = None) -> int:
         log_runtime(runtime)
 
         app = App(runtime.meta, runtime.dev, runtime.db, runtime.paths)
+        logger.info("Creating clieventhandler")
         evt_handler = CliEventHandler()
 
+        logger.info("Starting queue with: %s", queue)
         while queue:
             cmd, *queue = queue
+            logger.info("Sending command")
             for evt in app.run(cmd):
                 if isinstance(evt, EvtError) and evt.fatal:
                     logger.error("Fatal error in command %s; %s", cmd.cmd_id, evt.message)
                     break
 
+                logger.info("yielded")
                 new_cmd = evt_handler.handle(evt)
                 if isinstance(new_cmd, Command):
                     queue.append(new_cmd)

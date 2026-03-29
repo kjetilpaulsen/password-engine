@@ -4,7 +4,7 @@ import logging
 from typing import Callable
 
 # FIX: change project name for imports
-from password_engine.commands.commands import CmdGeneratePassword, Command
+from password_engine.commands.commands import Command, CmdConfirmPassword
 from password_engine.events.events import (
     Event,
     EvtConfirmPassword,
@@ -50,7 +50,7 @@ class CliEventHandler:
             EvtLogMessage: lambda evt: self._handle_evtlogmessage(evt),
             EvtError: lambda evt: self._handle_evterror(evt),
             EvtResult: lambda evt: self._handle_evtresult(evt),
-            EvtRequestInput: lambda evt: self._handle_evtrequestinput(evt),
+            EvtConfirmPassword: lambda evt: self._handle_evtrequestinput(evt),
 
         }
 
@@ -105,10 +105,24 @@ class CliEventHandler:
 
     def _handle_evtrequestinput(self, evt) -> Command:
         # Needs to be handled
-        if isinstance(evt, EvtConfirmPassword):
-            print(f"Acceptable password: {evt.password}\n")
-            inp = input(f"{evt.prompt}: ")
-            if inp == "y":
-                return CmdConfirmPassword(password=evt.password)
-            if inp == "n":
-                return evt.original_cmd
+        # Currently hardcoded confirmpassword
+        print(f"{evt.prompt}")
+        inp = input("Answer: ")
+        while inp not in evt.choices:
+            inp = input("Try again: ")
+        if inp == evt.choices[0]:
+            tag = input("Tag: ")
+            site_username = input("Site_username: ")
+            site_email = input("Site email: ")
+            site_url = input("Site url: ")
+            return CmdConfirmPassword(
+                cmd_id=evt.cmd_id,
+                password=evt.password,
+                session=evt.session,
+                tag=tag,
+                site_username=site_username,
+                site_email=site_email,
+                site_url=site_url,
+            )
+        elif inp == evt.choices[1]:
+            return evt.original_cmd
