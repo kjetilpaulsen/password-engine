@@ -53,7 +53,7 @@ class DisplayVersionHandler(CommandHandler):
             Iterator[Event]: A generator yielding events produced during
             command execution.
         """
-        logger.info("Handling CmdDisplayVersion ..")
+        logger.info(f"Handling {type(self.cmd).__name__}..")
         yield from self.display_version()
 
     def display_version(self) -> Iterator[Event]:
@@ -72,6 +72,8 @@ class DisplayVersionHandler(CommandHandler):
             version = version.upper()
         logger.debug("Yielding EvtResult ..")
         yield EvtResult(
-            command_name="DisplayVersion",
+            cmd_id=self.cmd.cmd_id,
+            result_type="DisplayVersion",
             payload={"version": version},
+            is_final=True,
             )

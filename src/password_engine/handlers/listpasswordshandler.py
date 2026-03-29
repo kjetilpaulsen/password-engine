@@ -58,7 +58,7 @@ class ListPasswordsHandler(CommandHandler):
             Iterator[Event]: A generator yielding events produced during
             command execution.
         """
-        logger.info("Handling CmdDisplayVersion ..")
+        logger.info(f"Handling {type(self.cmd).__name__}..")
         yield from self._list_passwords()
 
     def _input_username(self) -> str:
@@ -83,4 +83,4 @@ class ListPasswordsHandler(CommandHandler):
             )
             print(entry.tag, entry.site_username, entry.site_email, entry.site_url, password)
 
-        yield EvtLogMessage(level="info", message="Password listed")
+        yield EvtLogMessage(cmd_id=self.cmd.cmd_id, level="info", message="Password listed")

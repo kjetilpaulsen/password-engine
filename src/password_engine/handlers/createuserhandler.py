@@ -55,7 +55,7 @@ class CreateUserHandler(CommandHandler):
             Iterator[Event]: A generator yielding events produced during
             command execution.
         """
-        logger.info("Handling CmdCreateUser ..")
+        logger.info(f"Handling {type(self.cmd).__name__}..")
         yield from self._create_user()
 
     # def _input_username(self) -> str:

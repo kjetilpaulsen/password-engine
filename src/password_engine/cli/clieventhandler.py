@@ -43,6 +43,7 @@ class CliEventHandler:
     FIX: update docstring
     """
     def __init__(self) -> None:
+        logger.info("--INITIALIZING CLIEVENTHANDLER--")
         self._events: dict[type[Event], Callable] ={
             EvtStarted: lambda evt: self._handle_evtstarted(evt),
             EvtFinished: lambda evt: self._handle_evtfinished(evt),
