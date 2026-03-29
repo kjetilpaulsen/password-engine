@@ -4,13 +4,6 @@
 
 A Python application for secure password generation, storage, and retrieval, with encryption at rest and user-based access control.
 
-> **Note**
->
-> This project is currently in migration from the python-project-blueprint template.  
-> The command structure is temporarily not fully implemented.  
-> User input is currently handled directly in handlers instead of through the command system.  
-> This will be refactored to restore proper command → handler → event flow.
-
 ### What this is
 
 This repository is a **work-in-progress application** built on top of a modular Python architecture.
