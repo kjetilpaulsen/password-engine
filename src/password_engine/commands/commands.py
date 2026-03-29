@@ -23,3 +23,7 @@ class CmdListPasswords(Command): ...
 
 @dataclass(frozen=True)
 class CmdCreateUser(Command): ...
+
+@dataclass(frozen=True)
+class CmdConfirmPassword(Command):
+    password: str
