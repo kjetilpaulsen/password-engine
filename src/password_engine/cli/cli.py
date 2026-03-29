@@ -5,7 +5,10 @@ import logging
 # FIX: change project name for imports
 from password_engine.cli.clieventhandler import CliEventHandler
 from password_engine.commands.buildcommands import build_commands
+from password_engine.commands.commands import Command
+from password_engine.events.events import EvtError
 from password_engine.identity import IDENTITY
+from password_engine.runtime.runtime import Runtime
 from password_engine.utils.logging.setuplogging import setup_logging
 from password_engine.runtime.buildruntime import build_runtime
 from password_engine.cli.cliparser import cli_parser
@@ -46,8 +49,8 @@ def cli(argv: list[str] | None = None) -> int:
     try:
         frontendinputcommands, overrides= cli_parser(argv)
 
-        commands = build_commands(frontendinputcommands)
-        runtime = build_runtime(overrides)
+        queue: list[Command] = [build_commands(cmd) for cmd in frontendinputcommands]
+        runtime: Runtime = build_runtime(overrides)
 
         setup_logging(IDENTITY.logger_name,
                       runtime.paths,
@@ -57,8 +60,16 @@ def cli(argv: list[str] | None = None) -> int:
         app = App(runtime.meta, runtime.dev, runtime.db, runtime.paths)
         evt_handler = CliEventHandler()
 
-        for evt in app.run(commands):
-            evt_handler.handle(evt)
+        while queue:
+            cmd, *queue = queue
+            for evt in app.run(cmd):
+                if isinstance(evt, EvtError) and evt.fatal:
+                    logger.error("Fatal error in command %s; %s", cmd.cmd_id, evt.message)
+                    break
+
+                new_cmd = evt_handler.handle(evt)
+                if isinstance(new_cmd, Command):
+                    queue.append(new_cmd)
 
     except KeyboardInterrupt:
         logger.info("Interrupted by user.")

@@ -8,7 +8,7 @@ from password_engine.commands.frontendcommandinput import FrontendCommandInput
 
 logger = logging.getLogger(__name__)
 
-def build_commands(cmd_inputs: tuple[FrontendCommandInput, ...]) -> tuple[Command, ...]:
+def build_commands(cmd_input: FrontendCommandInput) -> Command:
     """
     Convert frontend command inputs into executable command objects.
 
@@ -55,9 +55,7 @@ def build_commands(cmd_inputs: tuple[FrontendCommandInput, ...]) -> tuple[Comman
     }
     commands: list[Command] = []
 
-    for item in cmd_inputs:
-        builder = command_builders.get(item.name)
-        if builder is None:
-            raise ValueError(f"Unsupported command input: {item.name}")
-        commands.append(builder(item.options))
-    return tuple(commands)
+    builder = command_builders.get(cmd_input.name)
+    if builder is None:
+        raise ValueError(f"Unsupported command input: {cmd_input.name}")
+    return builder(cmd_input.options)

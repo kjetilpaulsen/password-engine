@@ -79,7 +79,7 @@ class App:
         }
 
 
-    def run(self, cmds: Sequence[Command]) -> Iterator[Event]:
+    def run(self, cmd: Command) -> Iterator[Event]:
         """
         Execute a sequence of commands and yield resulting events.
 
@@ -98,28 +98,20 @@ class App:
             Event: Events produced during command execution.
         """
         logger.debug("Starting run(cmd) ..")
-        for cmd in cmds:
-            yield from self._handle_command(cmd)
-
-    def _handle_command(self, cmd: Command) -> Iterator[Event]:
-        """
-        Resolve and execute the handler corresponding to a command.
-
-        The method maps command types to their handler implementations.
-        If a matching handler exists, it is invoked and its resulting
-        event stream is yielded back to the caller.
-
-        Args:
-            cmd: A command instance representing an application action.
-
-        Yields:
-            Event: Events produced by the command handler.
-
-        Raises:
-            ValueError: If no handler is registered for the given command
-                type.
-        """
-        handler = self._handlers.get(type(cmd)) 
-        if handler is None:
-            raise ValueError(f"Command not found in _handlers: {type(cmd).__name__}")
-        yield from handler(cmd)
+        try:
+            handler = self._handlers.get(type(cmd)) 
+            if handler is None:
+                raise ValueError(f"Command not found in _handlers: {type(cmd).__name__}")
+            yield from handler(cmd)
+        except ValueError:
+            raise
+        except Exception as exc:
+            logger.exception("Unhandled exception while running command %s", type(cmd).__name__)
+            yield EvtError(
+                cmd_id=cmd.cmd_id, 
+                code="UNHANDELED_EXCEPTION", 
+                message=str(exc), 
+                fatal=True, 
+                details={"command_type": type(cmd).__name__,
+                },
+            )

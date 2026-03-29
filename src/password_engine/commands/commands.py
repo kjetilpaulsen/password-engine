@@ -4,6 +4,7 @@ class Command:
     """
     Base class for one-shot app commands.
     """
+    cmd_id: str # UUID
 
 @dataclass(frozen=True)
 class CmdDisplayVersion(Command):
